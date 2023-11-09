@@ -63,6 +63,7 @@ args = [
 MAX_RETRIES = 3
 LOGIN_PAGE = "https://www.upwork.com/ab/account-security/login"
 PROFILE_CONTACT_INFO = "https://www.upwork.com/freelancers/settings/api/v1/contactInfo"
+FILE_PATH = "data.json"
 
 
 async def block_resources(route: Route) -> None:
@@ -173,10 +174,14 @@ async def load_profile(page: Page) -> str | None:
         data = {
             "account": profile_id,
         }
-        file_path = "../data.json"
-        with open(file_path, "w") as f:
-            json.dump(data, f)
-        logger.info("data.json is ready")
+        try:
+            with open(FILE_PATH, "w") as f:
+                json.dump(data, f)
+            logger.info("data.json is ready")
+        except (FileNotFoundError, IOError) as e:
+            logger.error(f"There was an error when writing the file: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
         return profile_id
     else:
         logger.error("Failed to load the profile page after submitting the password")
@@ -234,13 +239,24 @@ async def main():
                 finale_data = await extract_data(
                     address_response_json, profile_response_json, profile_id
                 )
+                try:
+                    with open(FILE_PATH, "w") as f:
+                        json.dump(finale_data, f)
+                    logger.info("data.json is ready")
+                except (FileNotFoundError, IOError) as e:
+                    logger.error(f"There was an error when writing the file: {e}")
                 data_to_object = Employee(**finale_data)
-                print(data_to_object)
+                return data_to_object
             except (KeyError, ValueError, Error, TypeError) as e:
                 logger.error("Some errors happened: %s", e)
+            except Exception as e:
+                logger.error(f"An unexpected error occurred: {e}")
         else:
             logger.error("Can't get profile id, check the login function")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+
