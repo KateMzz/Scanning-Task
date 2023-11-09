@@ -38,3 +38,6 @@
     ```
 
 Replace `your_image_name` with the actual name you want to give to your Docker image.
+
+## Additional Information
+Need to add good proxies to handle captchas and cloudflare. The speed can be adjusted. 
